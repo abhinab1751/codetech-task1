@@ -1,0 +1,52 @@
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report, confusion_matrix, roc_auc_score
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import IsolationForest
+from sklearn.svm import OneClassSVM
+
+data = pd.read_csv('creditcard.csv.zip')
+
+X = data.drop('Class', axis=1)
+y = data['Class']
+
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.3, random_state=42, stratify=y)
+
+class_weights = {0: 1, 1: len(y) / (2 * sum(y))}
+
+rf_model = RandomForestClassifier(random_state=42, n_estimators=100, class_weight=class_weights)
+rf_model.fit(X_train, y_train)
+
+y_pred = rf_model.predict(X_test)
+print("Random Forest Classifier Evaluation:")
+print(confusion_matrix(y_test, y_pred))
+print(classification_report(y_test, y_pred))
+print("ROC AUC Score:", roc_auc_score(y_test, rf_model.predict_proba(X_test)[:, 1]))
+
+isolation_forest = IsolationForest(n_estimators=100, contamination=0.01, random_state=42)
+isolation_forest.fit(X_train)
+anomaly_scores = isolation_forest.decision_function(X_test)
+anomaly_predictions = isolation_forest.predict(X_test)
+
+anomaly_predictions = np.where(anomaly_predictions == 1, 0, 1)
+print("Isolation Forest Evaluation:")
+print(confusion_matrix(y_test, anomaly_predictions))
+print(classification_report(y_test, anomaly_predictions))
+
+one_class_svm = OneClassSVM(nu=0.01, kernel='rbf', gamma=0.1)
+one_class_svm.fit(X_train)
+svm_predictions = one_class_svm.predict(X_test)
+
+svm_predictions = np.where(svm_predictions == 1, 0, 1)
+print("One-Class SVM Evaluation:")
+print(confusion_matrix(y_test, svm_predictions))
+print(classification_report(y_test, svm_predictions))
+
+print("Summary of Fraud Detection Models:")
+print("\nRandom Forest Classifier performed best for supervised learning with balanced data using class weighting.")
+print("\nAnomaly detection methods such as Isolation Forest and One-Class SVM are suitable for unsupervised scenarios where labels are unavailable.")
