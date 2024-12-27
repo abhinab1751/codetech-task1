@@ -1,10 +1,15 @@
 NAME : Abhinaba dey
 ---
 COMPANY : CODTECH IT SOLUTIONS
+---
 ID : CT08DXK
+---
 DOMAIN : Machine learning
+---
 DURATION : december 2024 to january 2025
+---
 MENTOR : Sravani gouni
+---
 
 OVERVIEW OF THE PROJECT
 project : Develop a fraud detection model to identify fraudulent credit card
